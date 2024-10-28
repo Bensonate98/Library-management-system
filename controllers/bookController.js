@@ -47,9 +47,6 @@ const retrieveBooks = async (req, res)=>{
 const retrieveOneBook = async (req, res)=>{
   try{
     const {id} = req.params;
-    if(!id){
-      throw Error("query required");
-    }
     if(!mongoose.Types.ObjectId.isValid(id)){
       throw Error("invalid book");
     }
