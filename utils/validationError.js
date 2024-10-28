@@ -1,20 +1,36 @@
 const sendErrorResponse = (err, res)=>{
   let error, errorResponse;
-  if(err.message.includes("Product validation failed")){
-    error = {error: "Enter a product name"};
-    errorResponse = res.status(400).json(error);
+  if(err.message.includes("validation failed")){
+    error = "Empty input field";
+    errorResponse = res.status(400).json({
+      status: "error", 
+      code: 400, 
+      message: error, 
+      errors:{
+        details: "The required input fields are not completely field"
+      }
+    });
   }
-  if(err.message.includes("update validation failed")){
-    error = {error: "Enter new product name"};
-    errorResponse = res.status(400).json(error);
+
+  if(err.message.includes("invalid book")){
+    error = "Book not found";
+    errorResponse = res.status(404).json({
+      status: "error",
+      code: 404,
+      message: error, 
+      errors:{
+        details: "The book is not in the library"
+      }
+    });
   }
-  if(err.message.includes("query parameter required")){
-    error = {error: "productName query parameter required"};
-    errorResponse = res.status(400).json(error);
-  }
-  if(err.message.includes("invalid product")){
-    error = {error: "product not found"};
-    errorResponse = res.status(404).json(error);
+
+  if(err.message.includes("query required")){
+    error = "requires a query param",
+    errorResponse = res.status(400).json({
+      status: "error",
+      code: 400,
+      message: error
+    })
   }
   return errorResponse;
 }
