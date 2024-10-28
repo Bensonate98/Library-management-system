@@ -20,22 +20,9 @@ const addNewBook = async (req, res)=>{
 };
 
 //Retrieve all books or retrieve a book by its title
-const retrieveBook = async (req, res)=>{
+const retrieveBooks = async (req, res)=>{
   try{
-    const title = req.query.title;
-    if(title){
-      const book = await Book.findOne({title: { $regex: new RegExp(title, 'i') } });
-      if(book == null){
-      throw Error("invalid book");
-    }
-    return res.status(200).json({
-      status: "success",
-      code: 200, 
-      message: "Book retrieved successfully",
-      data: book
-    });   
-  }
-  const books = await Book.find();
+    const books = await Book.find();
     if(books.length === 0){
       return res.status(200).json({
         status: "success", 
@@ -56,18 +43,52 @@ const retrieveBook = async (req, res)=>{
   }
 };
 
-//Update a boook
+//Retrieve a book by its id
+const retrieveOneBook = async (req, res)=>{
+  try{
+    const {id} = req.params;
+    if(!id){
+      throw Error("query required");
+    }
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      throw Error("invalid book");
+    }
+    const book = await Book.findById(id);
+    if(book.length === 0){
+      return res.status(200).json({
+        status: "success", 
+        code: 200,
+        message: "Book not found", 
+        data: book
+      });
+    }
+    return res.status(200).json({
+      code: 200,
+      status: "success",  
+      message: "Book retrieved successfully", 
+      data: book
+    });
+}
+  catch(err){
+    sendErrorResponse(err, res);
+  }
+};
+
+//Update a book using the id
 const updateBook = async (req, res)=>{
   try{
-    const oldBook = req.query.title;
+    const {id} = req.params;
     const newBook = req.body;
-    if(!oldBook){
+    if(!id){
       throw Error("query required");
+    }
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      throw Error("invalid book");
     }
     if(Object.keys(newBook).length === 0){
       throw Error("update validation failed");
     }
-    const book = await Book.findOneAndUpdate({title: { $regex: new RegExp(oldBook, "i")} }, newBook, {new: true});
+    const book = await Book.findByIdAndUpdate(id, newBook, {new: true});
     console.log(book)
     if(book == null){
       throw Error("invalid book");
@@ -87,11 +108,14 @@ const updateBook = async (req, res)=>{
 //delete a book
 const deleteBook = async (req, res)=>{
   try{
-    const title = req.query.title;
-    if(!title){
+    const {id} = req.params;
+    if(!id){
       throw Error("query required");
     }
-    const book = await Book.findOneAndDelete({title: { $regex: new RegExp(title, 'i') }});
+    if(!mongoose.Types.ObjectId.isValid(id)){
+      throw Error("invalid book");
+    }
+    const book = await Book.findByIdAndDelete(id);
     if(book == null){
       throw Error("invalid book");
     }
@@ -106,4 +130,4 @@ const deleteBook = async (req, res)=>{
   }  
 }
 
-module.exports = { addNewBook, retrieveBook, updateBook, deleteBook }
+module.exports = { addNewBook, retrieveBooks, retrieveOneBook, updateBook, deleteBook }
